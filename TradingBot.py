@@ -12,8 +12,11 @@ columns = [
     'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume',
     'ignore'
 ]
-klines = client.get_historical_klines('BTCUSDT', Client.KLINE_INTERVAL_5MINUTE, "1 day ago UTC")
+klines = client.get_historical_klines('RUNEUSDT', Client.KLINE_INTERVAL_5MINUTE, "1 day ago UTC")
 data = pd.DataFrame(klines, columns = ['open_time','Open', 'High', 'Low', 'Close', 'Volume','close_time', 'qav','num_trades','taker_base_vol','taker_quote_vol', 'ignore'])
+
+data.dropna(subset=['Open', 'Close', 'Low', 'High', 'Volume'])
+
 df = data[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
 df = df.astype(float)
 
@@ -81,9 +84,8 @@ df['pointposbreak'] = df.apply(lambda row: pointposbreak(row), axis=1)
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime
-#st=10400
-#[st:st+350]
-dfpl = df
+st=0
+dfpl = df[st:st+1]
 dfpl.reset_index(inplace=True)
 fig = go.Figure(data=[go.Candlestick(x=dfpl.index,
                 open=dfpl['Open'],

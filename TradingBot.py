@@ -79,8 +79,9 @@ df['pointposbreak'] = df.apply(lambda row: pointposbreak(row), axis=1)
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime
-st=10400
-dfpl = df[st:st+350]
+#st=10400
+#[st:st+350]
+dfpl = df
 dfpl.reset_index(inplace=True)
 fig = go.Figure(data=[go.Candlestick(x=dfpl.index,
                 open=dfpl['Open'],

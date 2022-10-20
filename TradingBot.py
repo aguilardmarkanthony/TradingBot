@@ -14,20 +14,7 @@ klines = client.get_historical_klines('BTCUSDT', Client.KLINE_INTERVAL_5MINUTE, 
 data = pd.DataFrame(klines, columns = ['open_time','Open', 'High', 'Low', 'Close', 'Volume','close_time', 'qav','num_trades','taker_base_vol','taker_quote_vol', 'ignore'])
 df = data[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
 df = df.astype(float)
-#df = df.astype({'open_time':'str'})
-#df.astype({'open_time':'str','Open':'float','Low':'float','Close':'float','High':'float', 'Volume':'float'})
-#df['Open'].apply(lambda x: float(x))
-#df['Low'].apply(lambda x: float(x))
-#df['Close'].apply(lambda x: float(x))
-#df['High'].apply(lambda x: float(x))
-#df['Volume'].apply(lambda x: float(x))
-#df=pd.read_csv("EURUSD_Candlestick_5_M_ASK_30.09.2019-30.09.2022.csv")
-#df
 
-#df["Gmt time"]=df["Gmt time"].str.replace(".000","")
-#df['open_time']=df["open_time"].str.replace(r'.0','', regex=True)
-#df['open_time']=pd.to_datetime(df['open_time'],format='%d.%m.%Y %H:%M:%S')
-#data.open_time = pd.to_datetime(data.open_time, unit='ms')
 df['open_time'] = pd.to_datetime(data.open_time, unit='ms')
 
 df.set_index("open_time", inplace=True)

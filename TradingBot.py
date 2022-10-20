@@ -1,4 +1,6 @@
 import pandas as pd
+from backtesting import Strategy
+from backtesting import Backtest
 from binance.client import Client
 api_key = 'KWVUpuWlJyVeL58wn7dHmKDx2OjJ7uAqq6eo5dZRDirq0XkgFCGe8dX6w7ryZa0m'
 api_secret = 'TqGtGj8QuNRPhJb53mPSo3QklF02gZ10XSsXJ5QzXfyggkocsZkeCOlRttcmebUQ'
@@ -101,4 +103,43 @@ fig = go.Figure(data=[go.Candlestick(x=dfpl.index,
 fig.add_scatter(x=dfpl.index, y=dfpl['pointposbreak'], mode="markers",
                 marker=dict(size=10, color="MediumPurple"),
                 name="Signal")
+
+dfpl = df.copy()
+import pandas_ta as ta
+dfpl['ATR']=ta.atr(dfpl.High, dfpl.Low, dfpl.Close, length=7)
+#help(ta.atr)
+def SIGNAL():
+    return dfpl.TotalSignal
 fig.show()
+
+class MyStrat(Strategy):
+    initsize = 0.99
+    mysize = initsize
+    def init(self):
+        super().init()
+        self.signal1 = self.I(SIGNAL)
+
+    def next(self):
+        super().next()
+        slatr = 1.2*self.data.ATR[-1]
+        TPSLRatio = 1.5
+
+        if len(self.trades)>0:
+            if self.trades[-1].is_long and self.data.RSI[-1]>=90:
+                self.trades[-1].close()
+            elif self.trades[-1].is_short and self.data.RSI[-1]<=10:
+                self.trades[-1].close()
+        
+        if self.signal1==2 and len(self.trades)==0:
+            sl1 = self.data.Close[-1] - slatr
+            tp1 = self.data.Close[-1] + slatr*TPSLRatio
+            self.buy(sl=sl1, tp=tp1, size=self.mysize)
+        
+        elif self.signal1==1 and len(self.trades)==0:         
+            sl1 = self.data.Close[-1] + slatr
+            tp1 = self.data.Close[-1] - slatr*TPSLRatio
+            self.sell(sl=sl1, tp=tp1, size=self.mysize)
+
+bt = Backtest(dfpl, MyStrat, cash=100, margin=1/10, commission=0.00)
+stat = bt.run()
+stat

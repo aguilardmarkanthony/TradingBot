@@ -1,5 +1,4 @@
-from TradingPlatform.Binance import BinanceAPI as binance
-from TradingPlatform.Binance import BinanceSecretKey as apk
+from TradingPlatform.Binance.DataSource import BinanceAPI as binance
+from TradingPlatform.Binance.DataSource import BinanceSecretKey as apk
 
-print(apk.api_key)
 

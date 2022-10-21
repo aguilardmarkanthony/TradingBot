@@ -1,7 +1,13 @@
+import plotly.graph_objects as go
 import pandas as pd
+import pandas_ta as ta
+import numpy as np
 from backtesting import Strategy
 from backtesting import Backtest
 from binance.client import Client
+
+from plotly.subplots import make_subplots
+from datetime import datetime
 api_key = 'KWVUpuWlJyVeL58wn7dHmKDx2OjJ7uAqq6eo5dZRDirq0XkgFCGe8dX6w7ryZa0m'
 api_secret = 'TqGtGj8QuNRPhJb53mPSo3QklF02gZ10XSsXJ5QzXfyggkocsZkeCOlRttcmebUQ'
 client = Client(api_key, api_secret)
@@ -12,7 +18,7 @@ columns = [
     'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume',
     'ignore'
 ]
-klines = client.get_historical_klines('RUNEUSDT', Client.KLINE_INTERVAL_5MINUTE, "1 day ago UTC")
+klines = client.get_historical_klines('BNBUSDT', Client.KLINE_INTERVAL_5MINUTE, "1 day ago UTC")
 data = pd.DataFrame(klines, columns = ['open_time','Open', 'High', 'Low', 'Close', 'Volume','close_time', 'qav','num_trades','taker_base_vol','taker_quote_vol', 'ignore'])
 
 data.dropna(subset=['Open', 'Close', 'Low', 'High', 'Volume'])
@@ -24,9 +30,9 @@ df['open_time'] = pd.to_datetime(data.open_time, unit='ms')
 
 df.set_index("open_time", inplace=True)
 df=df[df.High!=df.Low]
-len(df)
+tlen = len(df)
 
-import pandas_ta as ta
+
 df["VWAP"]=ta.vwap(df.High, df.Low, df.Close, df.Volume)
 df['RSI']=ta.rsi(df.Close, length=16)
 my_bbands = ta.bbands(df.Close, length=14, std=2.0)
@@ -70,7 +76,7 @@ df['TotalSignal'] = TotSignal
 
 df[df.TotalSignal!=0].count()
 
-import numpy as np
+
 def pointposbreak(x):
     if x['TotalSignal']==1:
         return x['High']+1e-4
@@ -81,11 +87,9 @@ def pointposbreak(x):
 
 df['pointposbreak'] = df.apply(lambda row: pointposbreak(row), axis=1)
 
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-from datetime import datetime
+
 st=0
-dfpl = df[st:st+1]
+dfpl = df[st:tlen]
 dfpl.reset_index(inplace=True)
 fig = go.Figure(data=[go.Candlestick(x=dfpl.index,
                 open=dfpl['Open'],
@@ -107,12 +111,12 @@ fig.add_scatter(x=dfpl.index, y=dfpl['pointposbreak'], mode="markers",
                 name="Signal")
 
 dfpl = df.copy()
-import pandas_ta as ta
+
 dfpl['ATR']=ta.atr(dfpl.High, dfpl.Low, dfpl.Close, length=7)
 #help(ta.atr)
 def SIGNAL():
     return dfpl.TotalSignal
-fig.show()
+#fig.show()
 
 class MyStrat(Strategy):
     initsize = 0.99
@@ -124,7 +128,7 @@ class MyStrat(Strategy):
     def next(self):
         super().next()
         slatr = 1.2*self.data.ATR[-1]
-        TPSLRatio = 1.5
+        TPSLRatio = 2
 
         if len(self.trades)>0:
             if self.trades[-1].is_long and self.data.RSI[-1]>=90:
@@ -142,6 +146,6 @@ class MyStrat(Strategy):
             tp1 = self.data.Close[-1] - slatr*TPSLRatio
             self.sell(sl=sl1, tp=tp1, size=self.mysize)
 
-bt = Backtest(dfpl, MyStrat, cash=100, margin=1/10, commission=0.00)
+bt = Backtest(dfpl, MyStrat, cash=100000, margin=1/10, commission=0.00)
 stat = bt.run()
 stat

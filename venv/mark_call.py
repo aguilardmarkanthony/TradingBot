@@ -9,7 +9,7 @@ import pandas_ta as ta
 import requests
 import time
 
-header = {'authorization': 'NDAzMjE3MTIyMTM1NjM4MDE2.GtDPvz.X-YMTG6MqZtVksgeMrGEIhtcu-kRjzY5v7g1WU',
+header = {'authorization': 'NDAzMjE3MTIyMTM1NjM4MDE2.Gwwd9N.yLL2EbVN1frbQOG8JFqgicV-v1qpG7Sf-T85ZU',
           'Accept': 'text/plain'}
 
 exchange_info = binance.exchange_info()

@@ -9,13 +9,22 @@ import pandas_ta as ta
 import requests
 import time
 
-header = {'authorization': 'MTAxMDQ2NjA3MDYwOTU0MzIxMQ.GzuuTh.cvAwmQYiCxd_y2tD8wKekNj7xfV7p_3uRL-n2g',
+header = {'authorization': 'NDAzMjE3MTIyMTM1NjM4MDE2.GtDPvz.X-YMTG6MqZtVksgeMrGEIhtcu-kRjzY5v7g1WU',
           'Accept': 'text/plain'}
 
 exchange_info = binance.exchange_info()
+def new_func(df):
+    my_bbands = ta.bbands(df.Close, length=14, std=2.0)
+    return my_bbands
+
 while True:
   for s in exchange_info['symbols']:
     symbol = str(s['symbol'])
+    base = s['symbol'][-4:]
+
+    if base != 'USDT':
+      continue
+
     if symbol == "USDCUSDT":
         continue 
     if symbol == "BUSDUSDT":
@@ -41,68 +50,53 @@ while True:
 
     df["VWAP"]=ta.vwap(df.High, df.Low, df.Close, df.Volume)
     df['RSI']=ta.rsi(df.Close, length=16)
+
     if df.empty:
       continue       
-    my_bbands = ta.bbands(df.Close, length=14, std=2.0)
-    df=df.join(my_bbands)
-    VWAPsignal = [0]*len(df)
-    backcandles = 15
 
-    for row in range(backcandles, len(df)):
-        upt = 1
-        dnt = 1
-        for i in range(row-backcandles, row+1):
-            if max(df.Open[i], df.Close[i])>=df.VWAP[i]:
-                dnt=0
-            if min(df.Open[i], df.Close[i])<=df.VWAP[i]:
-                upt=0
-        if upt==1 and dnt==1:
-            VWAPsignal[row]=3
-        elif upt==1:
-            VWAPsignal[row]=2
-        elif dnt==1:
-            VWAPsignal[row]=1
+    my_bbands = new_func(df)
+
+    if my_bbands is not None:
+      df=df.join(my_bbands)
+    else:
+      continue
+
 
     df['ATR']=ta.atr(high=df.High, low=df.Low, close=df.Close, length=14)
 
+    try:
+      slatr = 1.2*df.ATR[-1]
+    except TypeError:
+      continue 
 
-    slatr = 1.2*df.ATR[-1]
-    TPSLRatio = 2
-    tpatr = slatr*2
+    try:
+      TPSLRatio = 2
+      tpatr = slatr*2
+    except TypeError:
+      continue
 
-    fig = go.Figure(data=[go.Candlestick(x=df.index,
-                open=df['Open'],
-                high=df['High'],
-                low=df['Low'],
-                close=df['Close']),
-                go.Scatter(x=df.index, y=df.VWAP, 
-                           line=dict(color='blue', width=1), 
-                           name="VWAP"), 
-                go.Scatter(x=df.index, y=df['BBL_14_2.0'], 
-                           line=dict(color='green', width=1), 
-                           name="BBL"),
-                go.Scatter(x=df.index, y=df['BBU_14_2.0'], 
-                           line=dict(color='green', width=1), 
-                           name="BBU")])
-
-    if (df.Close[-1]<=df['BBL_14_2.0'][-1]
-        and df.RSI[-1]<45):
+    if (df.Close[-1] > df['VWAP'][-1] 
+        and df['BBL_14_2.0'][-1]  > df.Close[-1]
+        and df['BBL_14_2.0'][-1] > df['VWAP'][-1] 
+        and df.RSI[-1] < 45):
             #buy long position
             TP = str(df.Open[-1] + tpatr)
             SL = str(df.Open[-1] - slatr)
             open = str(df.Open[-1])
-            content = str('Long position - Symbol:'+symbol+' EP: '+open+' TP: '+TP+' SL: '+SL)
+            content = str('Long position - Symbol: '+symbol+' EP: '+open+' TP: '+TP+' SL: '+SL)
             data = { "content": content }
             r = requests.post("https://discord.com/api/v9/channels/1032975832186093608/messages", headers=header, data=data)
             time.sleep(1)   
             
-    if (df.Close[-1]>=df['BBU_14_2.0'][-1]
-        and df.RSI[-1]>55):
+    if (df['VWAP'][-1] > df.Close[-1] 
+        and df.Close[-1] > df['BBU_14_2.0'][-1] 
+        and df['VWAP'][-1]  > df['BBU_14_2.0'][-1] 
+        and df.RSI[-1] > 55):
             #sell short position
             TP = str(df.Open[-1] - tpatr)
             SL = str(df.Open[-1] + slatr)
             open = str(df.Open[-1])
-            content = str('Long position - Symbol:'+symbol+' EP: '+open+' TP: '+TP+' SL: '+SL)
+            content = str('Short position - Symbol: '+symbol+' EP: '+open+' TP: '+TP+' SL: '+SL)
             data = { "content": content }
             r = requests.post("https://discord.com/api/v9/channels/1032975832186093608/messages", headers=header, data=data)
             time.sleep(1)  

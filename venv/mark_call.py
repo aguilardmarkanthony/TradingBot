@@ -73,7 +73,7 @@ while True:
       TPSLRatio = 2
       tpatr = slatr*2
     except TypeError:
-      continue`
+      continue
     if (df.Close[-1] > df['VWAP'][-1] 
         and df['BBL_14_2.0'][-1]  > df.Close[-1]
         and df['BBL_14_2.0'][-1] > df['VWAP'][-1] 

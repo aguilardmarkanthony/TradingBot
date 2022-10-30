@@ -17,16 +17,23 @@ def exchange_info():
 def historical_klines(symbol):
   try:
     client = Client(apk.api_key, apk.api_secret)
-    historical_klines = client.get_historical_klines(symbol, Client.KLINE_INTERVAL_30MINUTE, '1 days ago UTC') #need to change, temporarily hard coded params
+    historical_klines = client.get_historical_klines(symbol, Client.KLINE_INTERVAL_5MINUTE, '2 hours ago UTC') #need to change, temporarily hard coded params
     return historical_klines
   except:
     print("Cannot get historical klines")
 
 def orderbook_tickers():
-  
   try:
     client = Client(apk.api_key, apk.api_secret)
     orderbook_tickers = client.get_orderbook_tickers()
     return orderbook_tickers
   except:
     print("Cannot get orderbook tickers")
+
+def all_tickers():
+  try:
+      client = Client(apk.api_key, apk.api_secret)
+      all_tickers = client.get_all_tickers()
+      return all_tickers
+  except:
+      print("Cannot get all tickers")

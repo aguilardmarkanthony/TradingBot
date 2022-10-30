@@ -9,6 +9,9 @@ import pandas_ta as ta
 import requests
 import time
 
+
+
+
 header = {'authorization': 'NDAzMjE3MTIyMTM1NjM4MDE2.Gwwd9N.yLL2EbVN1frbQOG8JFqgicV-v1qpG7Sf-T85ZU',
           'Accept': 'text/plain'}
 
@@ -40,7 +43,7 @@ while True:
                                                 'taker_base_vol','taker_quote_vol', 'ignore'])
     if data.empty:
       continue   
-                                             
+
     data.dropna(subset=['Open', 'Close', 'Low', 'High', 'Volume'])
     df = data[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
     df = df.astype(float)
@@ -81,9 +84,15 @@ while True:
         and df['BBL_14_2.0'][-1] > df['VWAP'][-1] 
         and df.RSI[-1] < 45):
             #buy long position
-            TP = str(df.Open[-1] + tpatr)
-            SL = str(df.Open[-1] - slatr)
-            open = str(df.Open[-1])
+            all_tickers = binance.all_tickers()
+            for t in all_tickers:
+              if t['symbol'] != symbol:
+                continue
+              else:
+                price = str(t['symbol']+' '+t['price'])
+            TP = str(t['price'] + tpatr)
+            SL = str(t['price'] - slatr)
+            open = str(t['price'])
             content = str('Long position - Symbol: '+symbol+' EP: '+open+' TP: '+TP+' SL: '+SL)
             data = { "content": content }
             r = requests.post("https://discord.com/api/v9/channels/1032975832186093608/messages", headers=header, data=data)
@@ -94,9 +103,15 @@ while True:
         and df['VWAP'][-1]  > df['BBU_14_2.0'][-1] 
         and df.RSI[-1] > 55):
             #sell short position
-            TP = str(df.Open[-1] - tpatr)
-            SL = str(df.Open[-1] + slatr)
-            open = str(df.Open[-1])
+            all_tickers = binance.all_tickers()
+            for t in all_tickers:
+              if t['symbol'] != symbol:
+                continue
+              else:
+                price = str(t['symbol']+' '+t['price'])
+            TP = str(t['price'] - tpatr)
+            SL = str(t['price'] + slatr)
+            open = str(t['price'])
             content = str('Short position - Symbol: '+symbol+' EP: '+open+' TP: '+TP+' SL: '+SL)
             data = { "content": content }
             r = requests.post("https://discord.com/api/v9/channels/1032975832186093608/messages", headers=header, data=data)

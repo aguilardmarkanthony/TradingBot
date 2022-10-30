@@ -39,7 +39,8 @@ while True:
                                                 'Volume','close_time', 'qav','num_trades',
                                                 'taker_base_vol','taker_quote_vol', 'ignore'])
     if data.empty:
-      continue                                            
+      continue   
+                                             
     data.dropna(subset=['Open', 'Close', 'Low', 'High', 'Volume'])
     df = data[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
     df = df.astype(float)
@@ -74,6 +75,7 @@ while True:
       tpatr = slatr*2
     except TypeError:
       continue
+
     if (df.Close[-1] > df['VWAP'][-1] 
         and df['BBL_14_2.0'][-1]  > df.Close[-1]
         and df['BBL_14_2.0'][-1] > df['VWAP'][-1] 

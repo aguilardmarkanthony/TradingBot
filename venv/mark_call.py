@@ -89,10 +89,11 @@ while True:
               if t['symbol'] != symbol:
                 continue
               else:
-                price = str(t['symbol']+' '+t['price'])
-            TP = str(t['price'] + tpatr)
-            SL = str(t['price'] - slatr)
-            open = str(t['price'])
+                price = float(t['price'])
+                break
+            TP = str(price + tpatr)
+            SL = str(price - slatr)
+            open = price
             content = str('Long position - Symbol: '+symbol+' EP: '+open+' TP: '+TP+' SL: '+SL)
             data = { "content": content }
             r = requests.post("https://discord.com/api/v9/channels/1032975832186093608/messages", headers=header, data=data)
@@ -108,10 +109,11 @@ while True:
               if t['symbol'] != symbol:
                 continue
               else:
-                price = str(t['symbol']+' '+t['price'])
-            TP = str(t['price'] - tpatr)
-            SL = str(t['price'] + slatr)
-            open = str(t['price'])
+                price = float(t['price'])
+                break
+            TP = str(price - tpatr)
+            SL = str(price + slatr)
+            open = price
             content = str('Short position - Symbol: '+symbol+' EP: '+open+' TP: '+TP+' SL: '+SL)
             data = { "content": content }
             r = requests.post("https://discord.com/api/v9/channels/1032975832186093608/messages", headers=header, data=data)

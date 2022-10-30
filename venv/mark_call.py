@@ -52,8 +52,15 @@ while True:
     df=df[df.High!=df.Low]
     tlen = len(df)
 
-    df["VWAP"]=ta.vwap(df.High, df.Low, df.Close, df.Volume)
-    df['RSI']=ta.rsi(df.Close, length=16)
+    try:
+      df["VWAP"]=ta.vwap(df.High, df.Low, df.Close, df.Volume)
+    except:
+      continue
+
+    try:
+      df['RSI']=ta.rsi(df.Close, length=16)
+    except:
+      continue
 
     if df.empty:
       continue       
@@ -65,8 +72,10 @@ while True:
     else:
       continue
 
-
-    df['ATR']=ta.atr(high=df.High, low=df.Low, close=df.Close, length=14)
+    try:  
+      df['ATR']=ta.atr(high=df.High, low=df.Low, close=df.Close, length=14)
+    except:
+      continue
 
     try:
       slatr = 1.2*df.ATR[-1]

@@ -14,10 +14,10 @@ def exchange_info():
     print("Cannot get exchange info")
   
 
-def historical_klines(symbol):
+def historical_klines(symbol, interval):
   try:
     client = Client(apk.api_key, apk.api_secret)
-    historical_klines = client.get_historical_klines(symbol, Client.KLINE_INTERVAL_5MINUTE, '2 hours ago UTC') #need to change, temporarily hard coded params
+    historical_klines = client.get_historical_klines(symbol, Client.KLINE_INTERVAL_5MINUTE, interval) #need to change, temporarily hard coded params
     return historical_klines
   except:
     print("Cannot get historical klines")
@@ -37,3 +37,4 @@ def all_tickers():
       return all_tickers
   except:
       print("Cannot get all tickers")
+

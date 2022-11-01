@@ -11,18 +11,20 @@ import pandas    as pd
 import pandas_ta as ta
 import requests
 import time
+from binance.client import Client
+from binance.helpers import round_step_size
 
-
-exchange_info = binance.exchange_info()
+futures_exchange_info = binance.futures_exchange_info()
 
 while True:
-  for s in exchange_info['symbols']:
-    symbol = func.get_symbol(s)
-    base = func.get_base(s)
+  for s in futures_exchange_info['symbols']:
+    symbol = func.get_symbol(s['symbol'])
+    contract_type = func.get_contract_type(s['symbol'])
+    if func.check_contract_type(contract_type): continue
+    base = func.get_base(symbol)
     if func.check_base(base): continue
-    if func.exclude_fiat(symbol): continue
-
-    df = func.get_base_df(symbol=symbol,interval=attr.three_hr)
+    symbol = func.modify_symbol(symbol)
+    df = func.get_base_df(symbol=symbol,start=attr.three_hr) 
 
     if not isinstance(df, type(None)):
       try:

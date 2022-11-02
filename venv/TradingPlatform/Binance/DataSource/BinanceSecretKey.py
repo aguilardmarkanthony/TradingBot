@@ -1,2 +1,6 @@
 api_key = 'KWVUpuWlJyVeL58wn7dHmKDx2OjJ7uAqq6eo5dZRDirq0XkgFCGe8dX6w7ryZa0m'
 api_secret = 'TqGtGj8QuNRPhJb53mPSo3QklF02gZ10XSsXJ5QzXfyggkocsZkeCOlRttcmebUQ'
+
+
+api_key_xed = 'a7c9651e40148a87da4f5d5c6cd66648011a4b356dd99d1d1076fae846a34d05'
+api_secret_xed = '029ea1bebfa7cbd38df619e5b4fadf1d1ecd4fd39dc07fbc480c82e59b532415'

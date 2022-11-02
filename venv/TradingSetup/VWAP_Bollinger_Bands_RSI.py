@@ -10,6 +10,7 @@ import pandas    as pd
 import pandas_ta as ta
 import requests
 import time
+from binance.helpers import round_step_size
 
 header = attr.header
 
@@ -68,12 +69,26 @@ def VWAP_BB_RSI(df,symbol):
                 SL = str(price - slatr)
                 open = str(price)
 #will remove starting here   
-                content = str('Long position - Symbol: '+symbol+' EP: '+open+' TP: '+TP+' SL: '+SL)
+                content = str('Long position - Symbol: '+symbol+' Entry point: '+open+' Take profit: '+TP+' Stop loss: '+SL)
                 data = { "content": content }
                 r = requests.post("https://discord.com/api/v9/channels/1032975832186093608/messages", headers=header, data=data)
                 print(content)
 #will remove ending here  
-                time.sleep(1)   
+
+                tick_size = float(binance.get_min_quantity(symbol))
+                quantity = round(float(float(50 / price) * 50),3)
+                take_profit_price = round_step_size(TP, tick_size)
+                stop_loss_price = round_step_size(SL, tick_size)
+
+                #MARKET order
+                binance.futures_market_order(symbol=symbol, quantity=quantity, positionSide='LONG')
+                time.sleep(5) 
+                #TAKE_PROFIT_MARKET order
+                binance.futures_tp_market_order(symbol,tp=take_profit_price, positionSide='LONG')
+                time.sleep(5) 
+                #STOP_MARKET order
+                binance.futures_sl_market_order(symbol, sl=stop_loss_price, positionSide='LONG')
+                time.sleep(100)   
                 return open, TP,  SL
     except: print("Error getting long position")
         
@@ -89,11 +104,24 @@ def VWAP_BB_RSI(df,symbol):
                 SL = str(price + slatr)
                 open = str(price)               
 #will remove starting here                
-                content = str('Short position - Symbol: '+symbol+' EP: '+open+' TP: '+TP+' SL: '+SL)
+                content = str('Short position - Symbol: '+symbol+' Entry point: '+open+' Take profit: '+TP+' Stop loss: '+SL)
                 data = { "content": content }
                 r = requests.post("https://discord.com/api/v9/channels/1032975832186093608/messages", headers=header, data=data)
                 print(content)
-#will remove ending here                  
-                time.sleep(1)  
+#will remove ending here            
+                tick_size = float(binance.get_min_quantity(symbol))
+                quantity = round(float(float(50 / price) * 50),3)
+                take_profit_price = round_step_size(TP, tick_size)
+                stop_loss_price = round_step_size(SL, tick_size)
+
+                #MARKET order
+                binance.futures_market_order(symbol=symbol, quantity=quantity, positionSide='SHORT')
+                time.sleep(5)  
+                #TAKE_PROFIT_MARKET order
+                binance.futures_tp_market_order(symbol,tp=take_profit_price, positionSide='SHORT')
+                time.sleep(5) 
+                #STOP_MARKET order
+                binance.futures_sl_market_order(symbol, sl=stop_loss_price, positionSide='SHORT')
+                time.sleep(100)  
                 return open, TP,  SL
     except: print("Error getting short position")

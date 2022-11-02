@@ -12,11 +12,15 @@ def get_symbol(s):
     return symbol
 
 def get_base(s):
-    base = s['symbol'][-4:]
+    base = s[-3:]
     return base
 
 def check_base(base):
-    if base != 'USDT':
+    if base != 'USD':
+        return True
+
+def check_contract_type(contract_type):
+    if contract_type != 'PERP':
         return True
 
 def exclude_fiat(symbol):
@@ -63,8 +67,8 @@ def get_price(symbol, all_tickers):
     return price
 
 
-def get_base_df(symbol, interval):
-    klines = binance.historical_klines(symbol=symbol, interval=interval)
+def get_base_df(symbol, start):
+    klines = binance.futures_historical_klines(symbol=symbol, start=start)
     data = pd.DataFrame(klines, columns=attr.columns)
     if data.empty:
         pass
@@ -77,3 +81,20 @@ def get_base_df(symbol, interval):
         df=df[df.High!=df.Low]
         df.set_index("open_time", inplace=True, drop=True)
         return df
+
+def get_contract_type(symbol_raw):
+    symbol_raw = str(symbol_raw)
+    symbol_split = symbol_raw.split('_')
+    contract_type = symbol_split[1]
+    return contract_type
+
+def get_symbol(symbol_raw):
+    symbol_raw = str(symbol_raw)
+    symbol_split = symbol_raw.split('_')
+    symbol = symbol_split[0]
+    return symbol
+
+def modify_symbol(symbol):
+    symbol = str(symbol)+str('T')
+    return symbol
+
